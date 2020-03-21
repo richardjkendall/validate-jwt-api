@@ -35,7 +35,7 @@ def validate_jwt(token, key_set, aud):
       algorithms=[headers["alg"]],
       audience=aud
     )
-    return decoded
+    return json.loads(decoded)
   else:
     # could not find the key, probably an issue with keycloak
     raise SystemFailureException("Key could not be found in key set")
