@@ -17,3 +17,9 @@ if [ -d cffi ]; then rm -R cffi; fi
 unzip cffi.whl -d cffi
 rm output/_cffi_backend*
 cp cffi/_cffi_backend.cpython-38-x86_64-linux-gnu.so output/
+
+rm -Rf output/cffi
+rm -Rf output/cffi-1.14.0.dist-info
+
+mv cffi/cffi output
+mv cffi/cffi-1.14.0.dist-info output
