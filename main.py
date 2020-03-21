@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 def success_json_response(payload):
   """Turns payload into a JSON HTTP200 response"""
-  response = make_response(str(jsonify(payload)), 200)
+  response = make_response(jsonify(payload), 200)
   response.headers["Content-type"] = "application/json"
   return response
 
@@ -61,9 +61,7 @@ def root():
     aud=request.json["aud"]
   )
   logger.info("Validated")
-  return success_json_response({
-    "status": "valid"
-  })
+  return success_json_response(d)
 
 if __name__ == '__main__':
   lambda_handler.run(debug=True, port=5001, host="0.0.0.0", threaded=True)
