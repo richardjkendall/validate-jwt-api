@@ -58,7 +58,7 @@ def root():
     aud=request.json["aud"]
   )
   logger.info("Validated")
-  return d
+  return success_json_response(d)
 
 if __name__ == '__main__':
   lambda_handler.run(debug=True, port=5001, host="0.0.0.0", threaded=True)
