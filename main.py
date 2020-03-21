@@ -5,9 +5,9 @@ from flask import request, jsonify, make_response, g
 import jwt
 import json
 from jwt.algorithms import RSAAlgorithm
+from jwt.exceptions import ExpiredSignatureError
 
-
-from error_handler import error_handler, BadRequestException, SystemFailureException
+from error_handler import error_handler, BadRequestException, SystemFailureException, SignatureExpiredException
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s [%(levelname)s] (%(threadName)-10s) %(message)s')
 lambda_handler = FlaskLambda(__name__)
@@ -29,13 +29,16 @@ def validate_jwt(token, key_set, aud):
       public_key = RSAAlgorithm.from_jwk(json.dumps(key))
   # then validate the token against the key
   if public_key:
-    decoded = jwt.decode(
-      token,
-      public_key,
-      algorithms=[headers["alg"]],
-      audience=aud
-    )
-    return json.loads(decoded)
+    try:
+      decoded = jwt.decode(
+        token,
+        public_key,
+        algorithms=[headers["alg"]],
+        audience=aud
+      )
+      return decoded
+    except ExpiredSignatureError as e:
+      raise SignatureExpiredException("Signature not valid")
   else:
     # could not find the key, probably an issue with keycloak
     raise SystemFailureException("Key could not be found in key set")
@@ -58,7 +61,9 @@ def root():
     aud=request.json["aud"]
   )
   logger.info("Validated")
-  return success_json_response(d)
+  return success_json_response({
+    "status": "valid"
+  })
 
 if __name__ == '__main__':
   lambda_handler.run(debug=True, port=5001, host="0.0.0.0", threaded=True)

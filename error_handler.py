@@ -1,6 +1,5 @@
 from functools import wraps
 from flask import request, make_response, jsonify, g
-from jwt.exceptions import ExpiredSignatureError
 
 class BadRequestException(Exception):
     """Class for BadRequestException"""
@@ -8,6 +7,11 @@ class BadRequestException(Exception):
         Exception.__init__(self, *args, **kwargs)
 
 class SystemFailureException(Exception):
+    """Class for UnauthorisedException"""
+    def __init__(self, *args, **kwargs):
+        Exception.__init__(self, *args, **kwargs)
+
+class SignatureExpiredException(Exception):
     """Class for UnauthorisedException"""
     def __init__(self, *args, **kwargs):
         Exception.__init__(self, *args, **kwargs)
@@ -54,7 +58,7 @@ def error_handler(f):
             return f(*args, **kwargs)
         except BadRequestException as err:
             return exception_to_json_response(err, 400)
-        except ExpiredSignatureError as err:
+        except SignatureExpiredException as err:
             return exception_to_json_response(err, 401)
         except SystemFailureException as err:
             return exception_to_json_response(err, 502)
